@@ -7,5 +7,9 @@ type MinusExpression struct {
 }
 
 func (e MinusExpression) String() string {
-	return fmt.Sprintf("%s - %s", e.left, e.right)
+	return fmt.Sprintf("%s - %s", e.Left, e.Right)
+}
+
+func (e MinusExpression) GetToken() ExpToken {
+	return ExpToken{Pattern: ExpMinusExp}
 }

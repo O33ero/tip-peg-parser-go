@@ -1,4 +1,5 @@
 package expression
 
-type Expression struct {
+type Expression interface {
+	GetToken() ExpToken
 }

@@ -7,5 +7,9 @@ type DivExpression struct {
 }
 
 func (e DivExpression) String() string {
-	return fmt.Sprintf("%s / %s", e.left, e.right)
+	return fmt.Sprintf("%s / %s", e.Left, e.Right)
+}
+
+func (e DivExpression) GetToken() ExpToken {
+	return ExpToken{Pattern: ExpDivExp}
 }

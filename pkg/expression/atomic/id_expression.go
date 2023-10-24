@@ -1,9 +1,15 @@
 package atomic
 
+import "tip-peg-parser-go/pkg/expression"
+
 type IdExpression struct {
-	id string
+	Id string
+}
+
+func (e IdExpression) GetToken() expression.ExpToken {
+	return expression.ExpToken{Pattern: expression.Id}
 }
 
 func (e IdExpression) String() string {
-	return e.id
+	return e.Id
 }

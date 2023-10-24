@@ -7,5 +7,9 @@ type MultiExpression struct {
 }
 
 func (e MultiExpression) String() string {
-	return fmt.Sprintf("%s * %s", e.left, e.right)
+	return fmt.Sprintf("%s * %s", e.Left, e.Right)
+}
+
+func (e MultiExpression) GetToken() ExpToken {
+	return ExpToken{Pattern: ExpMultiExp}
 }

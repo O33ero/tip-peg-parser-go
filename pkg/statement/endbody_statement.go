@@ -8,5 +8,5 @@ func (s EndBodyStatement) GetToken() StmToken {
 }
 
 func (s EndBodyStatement) String() string {
-	return "{ ? }"
+	return " }"
 }

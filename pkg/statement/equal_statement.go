@@ -1,6 +1,13 @@
 package statement
 
+import (
+	"fmt"
+	"tip-peg-parser-go/pkg/expression"
+)
+
 type EqualStatement struct {
+	Id         string
+	Expression expression.Expression
 }
 
 func (s EqualStatement) GetToken() StmToken {
@@ -8,5 +15,5 @@ func (s EqualStatement) GetToken() StmToken {
 }
 
 func (s EqualStatement) String() string {
-	return "eq ? = ?"
+	return fmt.Sprintf("%s = %s ; ", s.Id, s.Expression)
 }

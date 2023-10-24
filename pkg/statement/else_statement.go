@@ -1,6 +1,9 @@
 package statement
 
+import "fmt"
+
 type ElseStatement struct {
+	Body BodyStatement
 }
 
 func (s ElseStatement) GetToken() StmToken {
@@ -8,5 +11,5 @@ func (s ElseStatement) GetToken() StmToken {
 }
 
 func (s ElseStatement) String() string {
-	return "Else "
+	return fmt.Sprintf("else %s", s.Body)
 }

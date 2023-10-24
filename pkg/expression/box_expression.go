@@ -3,9 +3,13 @@ package expression
 import "fmt"
 
 type BoxExpression struct {
-	exp Expression
+	Expression Expression
 }
 
 func (e BoxExpression) String() string {
-	return fmt.Sprintf("( %s )", e.exp)
+	return fmt.Sprintf("( %s )", e.Expression)
+}
+
+func (e BoxExpression) GetToken() ExpToken {
+	return ExpToken{Pattern: ExpBox}
 }

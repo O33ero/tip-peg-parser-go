@@ -7,5 +7,5 @@ type GreaterExpression struct {
 }
 
 func (e GreaterExpression) String() string {
-	return fmt.Sprintf("%s > %s", e.left, e.right)
+	return fmt.Sprintf("%s > %s", e.Left, e.Right)
 }

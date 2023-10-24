@@ -4,7 +4,15 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"tip-peg-parser-go/pkg/expression"
+	"tip-peg-parser-go/pkg/expression/atomic"
 	"tip-peg-parser-go/pkg/statement"
+)
+
+var (
+	stmTokens = statement.GetAllStatementTokens()
+	expTokens = expression.GetAllExpressionTokens()
+	atmTokens = expression.GetAllAtomicTokens()
 )
 
 func Parse(lines []string) {
@@ -16,15 +24,14 @@ func Parse(lines []string) {
 
 func statementLexer(lines []string) ([]statement.Statement, error) {
 	var (
-		output    []statement.Statement
-		stmTokens = statement.GetAllStatementTokens()
+		output []statement.Statement
 	)
 
 	prev := ""
 	for _, line := range lines {
 		next := prev + " " + line
 
-		statement, err := tryToGuessStatement(next, stmTokens)
+		statement, err := tryToGuessStatement(next)
 		if err != nil {
 			fmt.Printf("Cannot recognize token: %s\n", prev)
 			prev = next
@@ -47,27 +54,86 @@ func statementLexer(lines []string) ([]statement.Statement, error) {
 	return output, nil
 }
 
-func tryToGuessStatement(line string, tokens []statement.StmToken) (statement.Statement, error) {
-	for _, token := range tokens {
+func tryToGuessStatement(line string) (statement.Statement, error) {
+	for _, token := range stmTokens {
 		pattern, _ := token.GetPattern()
-		match := pattern.FindString(line)
-		if match != "" {
+		matches := pattern.FindAllStringSubmatch(line, -1)
+		if len(matches) != 0 {
 			switch token.Pattern {
 			case statement.IfElse:
-				return statement.IfStatement{}, nil
+				guessExpression, err := tryToGuessExpression(matches[0][1])
+				return statement.IfStatement{Condition: guessExpression}, err
 			case statement.WhileExp:
-				return statement.WhileStatement{}, nil
+				guessExpression, err := tryToGuessExpression(matches[0][1])
+				return statement.WhileStatement{Condition: guessExpression}, err
 			case statement.IfExp:
 				return statement.ElseStatement{}, nil
 			case statement.OutputExp:
-				return statement.OutputStatement{}, nil
+				exp, err := tryToGuessExpression(matches[0][2])
+				return statement.OutputStatement{Operation: matches[0][1], Expression: exp}, err
 			case statement.EndStm:
 				return statement.EndBodyStatement{}, nil
 			case statement.IdEqExp:
-				return statement.EqualStatement{}, nil
+				exp, err := tryToGuessExpression(matches[0][2])
+				return statement.EqualStatement{Id: matches[0][1], Expression: exp}, err
+			default:
+				return nil, errors.New("switch case mismatch")
 			}
 		}
 	}
+	return nil, errors.New("cannot recognize token")
+}
+
+func tryToGuessExpression(line string) (expression.Expression, error) {
+	for _, token := range expTokens {
+		pattern, _ := token.GetPattern()
+		matches := pattern.FindAllStringSubmatch(line, -1)
+		if len(matches) != 0 {
+			fmt.Printf("Expression: %s\n", matches)
+			switch token.Pattern {
+			case expression.ExpPlusExp:
+				left, err := tryToGuessExpression(matches[0][1])
+				right, err := tryToGuessExpression(matches[0][2])
+				return expression.PlusExpression{BiExpression: expression.BiExpression{Left: left, Right: right}}, err
+			case expression.ExpMinusExp:
+				left, err := tryToGuessExpression(matches[0][1])
+				right, err := tryToGuessExpression(matches[0][2])
+				return expression.MinusExpression{BiExpression: expression.BiExpression{Left: left, Right: right}}, err
+			case expression.ExpMultiExp:
+				left, err := tryToGuessExpression(matches[0][1])
+				right, err := tryToGuessExpression(matches[0][2])
+				return expression.MultiExpression{BiExpression: expression.BiExpression{Left: left, Right: right}}, err
+			case expression.ExpDivExp:
+				left, err := tryToGuessExpression(matches[0][1])
+				right, err := tryToGuessExpression(matches[0][2])
+				return expression.DivExpression{BiExpression: expression.BiExpression{Left: left, Right: right}}, err
+			case expression.ExpBox:
+				exp, err := tryToGuessExpression(matches[0][1])
+				return expression.BoxExpression{Expression: exp}, err
+			}
+		}
+	}
+
+	return tryToGuessAtomic(line)
+}
+
+func tryToGuessAtomic(line string) (expression.Expression, error) {
+	for _, token := range atmTokens {
+		pattern, _ := token.GetPattern()
+		matches := pattern.FindAllStringSubmatch(line, -1)
+		if len(matches) != 0 {
+			fmt.Printf("Atomic: %s\n", matches)
+			switch token.Pattern {
+			case expression.Id:
+				return atomic.IdExpression{Id: matches[0][1]}, nil
+			case expression.Int:
+				return atomic.IntExpression{Value: matches[0][1]}, nil
+			case expression.Input:
+				return atomic.InputExpression{}, nil
+			}
+		}
+	}
+
 	return nil, errors.New("cannot recognize token")
 }
 

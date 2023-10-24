@@ -1,12 +1,13 @@
 package statement
 
 import (
+	"fmt"
 	"tip-peg-parser-go/pkg/expression"
 )
 
 type IfStatement struct {
-	condition expression.Expression
-	body      BodyStatement
+	Condition expression.Expression
+	Body      BodyStatement
 }
 
 func (s IfStatement) GetToken() StmToken {
@@ -14,5 +15,5 @@ func (s IfStatement) GetToken() StmToken {
 }
 
 func (s IfStatement) String() string {
-	return "If ( ? ) "
+	return fmt.Sprintf("if ( %s ) %s", s.Condition, s.Body)
 }
