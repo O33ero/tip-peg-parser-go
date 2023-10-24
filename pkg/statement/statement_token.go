@@ -1,6 +1,8 @@
 package statement
 
-import "regexp"
+import (
+	"regexp"
+)
 
 const (
 	IfExp     Pattern = "if \\( (.*) \\)"
