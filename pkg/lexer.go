@@ -3,6 +3,7 @@ package pkg
 import (
 	"errors"
 	"fmt"
+	"github.com/golang-collections/collections/stack"
 	"strings"
 	"tip-peg-parser-go/pkg/expression"
 	"tip-peg-parser-go/pkg/expression/atomic"
@@ -18,8 +19,45 @@ var (
 func Parse(lines []string) {
 	flatted := lineFlatter(lines)
 	statements, _ := statementLexer(flatted)
+	fmt.Printf("Statements: %s\n", statements)
+	rootStatement, err := statementGrouper(statements)
+	if err != nil {
+		panic(err)
+	}
 
-	fmt.Printf("%s", statements)
+	fmt.Printf("%s\n", rootStatement)
+}
+
+func statementGrouper(statements []statement.Statement) (interface{}, error) {
+	headStatement := new(stack.Stack)
+	headStatement.Push(new(statement.RootStatement))
+
+	for _, stm := range statements {
+		fmt.Printf("Statement: %s\n", stm)
+		switch stm.(type) {
+		case statement.IfStatement:
+			headStatement.Push(stm)
+		case statement.WhileStatement:
+			headStatement.Push(stm)
+		case statement.ElseStatement:
+			headStatement.Push(stm)
+		case statement.EndBodyStatement:
+			currentHead := headStatement.Pop()
+			root := headStatement.Pop()
+			root.(statement.Container).Put(currentHead.(statement.Statement))
+			headStatement.Push(root)
+		default:
+			root := headStatement.Pop()
+			root.(statement.Container).Put(stm.(statement.Statement))
+			headStatement.Push(root)
+		}
+	}
+
+	if headStatement.Len() != 1 {
+		return statement.RootStatement{}, errors.New(fmt.Sprintf("Cannot to resolve: %s", headStatement.Peek()))
+	}
+
+	return headStatement.Pop(), nil
 }
 
 func statementLexer(lines []string) ([]statement.Statement, error) {
