@@ -19,8 +19,8 @@ func (s *BodyStatement) String() string {
 	return sb.String()
 }
 
-func (s *BodyStatement) Put(statement *Statement) {
-	s.Statements = append(s.Statements, statement)
+func (s *BodyStatement) Put(statement Statement) {
+	s.Statements = append(s.Statements, &statement)
 }
 
 func (s *BodyStatement) GetBodyStatement() []*Statement {

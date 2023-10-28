@@ -36,21 +36,22 @@ func statementGrouper(stments []*statement.Statement) (statement.RootStatement, 
 	headStatement.Push(new(statement.RootStatement))
 
 	for _, stm := range stments {
-		switch interface{}(stm).(type) {
+		t := (*stm).(interface{})
+		switch t.(type) {
 		case *statement.IfStatement:
-			headStatement.Push(stm)
+			headStatement.Push(*stm)
 		case *statement.WhileStatement:
-			headStatement.Push(stm)
+			headStatement.Push(*stm)
 		case *statement.ElseStatement:
-			headStatement.Push(stm)
+			headStatement.Push(*stm)
 		case *statement.EndBodyStatement:
 			currentHead := headStatement.Pop()
 			root := headStatement.Pop()
-			root.(statement.Container).Put(currentHead.(*statement.Statement))
+			root.(statement.Container).Put(currentHead.(statement.Statement))
 			headStatement.Push(root)
 		default:
 			root := headStatement.Pop()
-			root.(statement.Container).Put(stm)
+			root.(statement.Container).Put(*stm)
 			headStatement.Push(root)
 		}
 	}
@@ -102,13 +103,13 @@ func tryToGuessStatement(line string) (statement.Statement, error) {
 		matches := pattern.FindAllStringSubmatch(line, -1)
 		if len(matches) != 0 {
 			switch token.Pattern {
-			case statement.IfElse:
+			case statement.IfExp:
 				guessExpression, err := tryToGuessExpression(matches[0][1])
 				return &statement.IfStatement{Condition: guessExpression}, err
 			case statement.WhileExp:
 				guessExpression, err := tryToGuessExpression(matches[0][1])
 				return &statement.WhileStatement{Condition: guessExpression}, err
-			case statement.IfExp:
+			case statement.IfElse:
 				return &statement.ElseStatement{}, nil
 			case statement.OutputExp:
 				exp, err := tryToGuessExpression(matches[0][2])

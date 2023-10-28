@@ -18,7 +18,7 @@ func (s *WhileStatement) String() string {
 	return fmt.Sprintf("while ( %s ) %s", s.Condition, s.Body)
 }
 
-func (s *WhileStatement) Put(statement *Statement) {
+func (s *WhileStatement) Put(statement Statement) {
 	s.Body.Put(statement)
 }
 

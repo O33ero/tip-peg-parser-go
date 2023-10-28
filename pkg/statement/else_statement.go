@@ -14,7 +14,7 @@ func (s *ElseStatement) String() string {
 	return fmt.Sprintf("else %s", s.Body)
 }
 
-func (s *ElseStatement) Put(statement *Statement) {
+func (s *ElseStatement) Put(statement Statement) {
 	s.Body.Put(statement)
 }
 

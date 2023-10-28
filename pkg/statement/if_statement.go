@@ -18,7 +18,7 @@ func (s *IfStatement) String() string {
 	return fmt.Sprintf("if ( %s ) %s", s.Condition, s.Body)
 }
 
-func (s *IfStatement) Put(statement *Statement) {
+func (s *IfStatement) Put(statement Statement) {
 	s.Body.Put(statement)
 }
 

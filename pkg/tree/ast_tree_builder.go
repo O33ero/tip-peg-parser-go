@@ -52,19 +52,19 @@ func (b *ASTreeBuilder) Build() ASTree {
 			sbuilder.WriteString(fmt.Sprintf("%s", t.Condition))
 			sbuilder.WriteString(" is true ↓\n")
 			b.reduceLevelReminderOrPop()
-			//b.pushToStatementStack(t)
+			b.pushToStatementStack(t)
 		case *statement.ElseStatement:
 			sbuilder.WriteString(b.getOffset())
 			sbuilder.WriteString("else ↓\n")
 			b.reduceLevelReminder()
-			//b.pushToStatementStack(t)
+			b.pushToStatementStack(t)
 		case *statement.WhileStatement:
 			sbuilder.WriteString(b.getOffset())
 			sbuilder.WriteString("while ")
 			sbuilder.WriteString(fmt.Sprintf("%s", t.Condition))
 			sbuilder.WriteString(" is true ↺\n")
 			b.reduceLevelReminder()
-			//b.pushToStatementStack(t)
+			b.pushToStatementStack(t)
 		default:
 			panic("")
 		}
@@ -92,7 +92,7 @@ func (b *ASTreeBuilder) reduceLevelReminder() {
 
 func (b *ASTreeBuilder) pushToStatementStack(container statement.Container) {
 	for i := len(container.GetBodyStatement()) - 1; i >= 0; i-- {
-		b.statementStack.Push((container.GetBodyStatement())[i])
+		b.statementStack.Push(*(container.GetBodyStatement())[i])
 	}
 	b.levelStack.Push(len(container.GetBodyStatement()))
 }
