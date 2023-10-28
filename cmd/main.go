@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"strings"
 	"tip-peg-parser-go/pkg"
@@ -13,7 +14,8 @@ func main() {
 		"z = x + y;\n" +
 		"output z;"
 
-	pkg.Parse(strings.Split(code, "\n"))
+	rootStatement := pkg.Parse(strings.Split(code, "\n"))
+	fmt.Printf("%s", rootStatement)
 }
 
 func openFile(path string) (*os.File, error) {

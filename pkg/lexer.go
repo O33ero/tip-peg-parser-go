@@ -16,7 +16,7 @@ var (
 	atmTokens = expression.GetAllAtomicTokens()
 )
 
-func Parse(lines []string) {
+func Parse(lines []string) statement.RootStatement {
 	flatted := lineFlatter(lines)
 	statements, _ := statementLexer(flatted)
 	fmt.Printf("Statements: %s\n", statements)
@@ -24,17 +24,15 @@ func Parse(lines []string) {
 	if err != nil {
 		panic(err)
 	}
-
-	fmt.Printf("%s\n", rootStatement)
+	return rootStatement
 }
 
-func statementGrouper(statements []statement.Statement) (interface{}, error) {
+func statementGrouper(stments []statement.Statement) (statement.RootStatement, error) {
 	headStatement := new(stack.Stack)
 	headStatement.Push(new(statement.RootStatement))
 
-	for _, stm := range statements {
-		fmt.Printf("Statement: %s\n", stm)
-		switch stm.(type) {
+	for _, stm := range stments {
+		switch interface{}(stm).(type) {
 		case statement.IfStatement:
 			headStatement.Push(stm)
 		case statement.WhileStatement:
@@ -57,7 +55,9 @@ func statementGrouper(statements []statement.Statement) (interface{}, error) {
 		return statement.RootStatement{}, errors.New(fmt.Sprintf("Cannot to resolve: %s", headStatement.Peek()))
 	}
 
-	return headStatement.Pop(), nil
+	returnValue := headStatement.Pop()
+	v := returnValue.(statement.Container)
+	return statement.RootStatement{Body: statement.BodyStatement{Statements: v.GetBodyStatement()}}, nil
 }
 
 func statementLexer(lines []string) ([]statement.Statement, error) {
@@ -100,20 +100,20 @@ func tryToGuessStatement(line string) (statement.Statement, error) {
 			switch token.Pattern {
 			case statement.IfElse:
 				guessExpression, err := tryToGuessExpression(matches[0][1])
-				return statement.IfStatement{Condition: guessExpression}, err
+				return &statement.IfStatement{Condition: guessExpression}, err
 			case statement.WhileExp:
 				guessExpression, err := tryToGuessExpression(matches[0][1])
-				return statement.WhileStatement{Condition: guessExpression}, err
+				return &statement.WhileStatement{Condition: guessExpression}, err
 			case statement.IfExp:
-				return statement.ElseStatement{}, nil
+				return &statement.ElseStatement{}, nil
 			case statement.OutputExp:
 				exp, err := tryToGuessExpression(matches[0][2])
-				return statement.OutputStatement{Operation: matches[0][1], Expression: exp}, err
+				return &statement.OutputStatement{Operation: matches[0][1], Expression: exp}, err
 			case statement.EndStm:
-				return statement.EndBodyStatement{}, nil
+				return &statement.EndBodyStatement{}, nil
 			case statement.IdEqExp:
 				exp, err := tryToGuessExpression(matches[0][2])
-				return statement.EqualStatement{Id: matches[0][1], Expression: exp}, err
+				return &statement.EqualStatement{Id: matches[0][1], Expression: exp}, err
 			default:
 				return nil, errors.New("switch case mismatch")
 			}

@@ -10,10 +10,18 @@ type WhileStatement struct {
 	Body      BodyStatement
 }
 
-func (s WhileStatement) GetToken() StmToken {
+func (s *WhileStatement) GetToken() StmToken {
 	return StmToken{Pattern: WhileExp}
 }
 
-func (s WhileStatement) String() string {
+func (s *WhileStatement) String() string {
 	return fmt.Sprintf("while ( %s ) %s", s.Condition, s.Body)
+}
+
+func (s *WhileStatement) Put(statement Statement) {
+	s.Body.Put(statement)
+}
+
+func (s *WhileStatement) GetBodyStatement() []Statement {
+	return s.Body.GetBodyStatement()
 }

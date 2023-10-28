@@ -10,10 +10,18 @@ type IfStatement struct {
 	Body      BodyStatement
 }
 
-func (s IfStatement) GetToken() StmToken {
+func (s *IfStatement) GetToken() StmToken {
 	return StmToken{Pattern: IfExp}
 }
 
-func (s IfStatement) String() string {
+func (s *IfStatement) String() string {
 	return fmt.Sprintf("if ( %s ) %s", s.Condition, s.Body)
+}
+
+func (s *IfStatement) Put(statement Statement) {
+	s.Body.Put(statement)
+}
+
+func (s *IfStatement) GetBodyStatement() []Statement {
+	return s.Body.GetBodyStatement()
 }
