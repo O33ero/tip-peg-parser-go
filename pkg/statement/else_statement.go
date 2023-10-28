@@ -14,10 +14,10 @@ func (s *ElseStatement) String() string {
 	return fmt.Sprintf("else %s", s.Body)
 }
 
-func (s *ElseStatement) Put(statement Statement) {
+func (s *ElseStatement) Put(statement *Statement) {
 	s.Body.Put(statement)
 }
 
-func (s *ElseStatement) GetBodyStatement() []Statement {
+func (s *ElseStatement) GetBodyStatement() []*Statement {
 	return s.Body.GetBodyStatement()
 }

@@ -19,7 +19,11 @@ var (
 func Parse(lines []string) statement.RootStatement {
 	flatted := lineFlatter(lines)
 	statements, _ := statementLexer(flatted)
-	fmt.Printf("Statements: %s\n", statements)
+	fmt.Printf("Statements: ")
+	for _, s := range statements {
+		fmt.Printf("%s", *s)
+	}
+	fmt.Printf("\n")
 	rootStatement, err := statementGrouper(statements)
 	if err != nil {
 		panic(err)
@@ -27,26 +31,26 @@ func Parse(lines []string) statement.RootStatement {
 	return rootStatement
 }
 
-func statementGrouper(stments []statement.Statement) (statement.RootStatement, error) {
+func statementGrouper(stments []*statement.Statement) (statement.RootStatement, error) {
 	headStatement := new(stack.Stack)
 	headStatement.Push(new(statement.RootStatement))
 
 	for _, stm := range stments {
 		switch interface{}(stm).(type) {
-		case statement.IfStatement:
+		case *statement.IfStatement:
 			headStatement.Push(stm)
-		case statement.WhileStatement:
+		case *statement.WhileStatement:
 			headStatement.Push(stm)
-		case statement.ElseStatement:
+		case *statement.ElseStatement:
 			headStatement.Push(stm)
-		case statement.EndBodyStatement:
+		case *statement.EndBodyStatement:
 			currentHead := headStatement.Pop()
 			root := headStatement.Pop()
-			root.(statement.Container).Put(currentHead.(statement.Statement))
+			root.(statement.Container).Put(currentHead.(*statement.Statement))
 			headStatement.Push(root)
 		default:
 			root := headStatement.Pop()
-			root.(statement.Container).Put(stm.(statement.Statement))
+			root.(statement.Container).Put(stm)
 			headStatement.Push(root)
 		}
 	}
@@ -60,9 +64,9 @@ func statementGrouper(stments []statement.Statement) (statement.RootStatement, e
 	return statement.RootStatement{Body: statement.BodyStatement{Statements: v.GetBodyStatement()}}, nil
 }
 
-func statementLexer(lines []string) ([]statement.Statement, error) {
+func statementLexer(lines []string) ([]*statement.Statement, error) {
 	var (
-		output []statement.Statement
+		output []*statement.Statement
 	)
 
 	prev := ""
@@ -76,7 +80,7 @@ func statementLexer(lines []string) ([]statement.Statement, error) {
 			continue
 		}
 
-		output = append(output, statement)
+		output = append(output, &statement)
 
 		fmt.Printf("Resolve token: %s\n", next)
 		pattern, _ := statement.GetToken().GetPattern()
@@ -86,7 +90,7 @@ func statementLexer(lines []string) ([]statement.Statement, error) {
 
 	if strings.TrimSpace(prev) != "" {
 		fmt.Printf("Cannot recognize statement: %s\n", prev)
-		return []statement.Statement{}, errors.New("cannot recognize statement: " + prev)
+		return []*statement.Statement{}, errors.New("cannot recognize statement: " + prev)
 	}
 
 	return output, nil

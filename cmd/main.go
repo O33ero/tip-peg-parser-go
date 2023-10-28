@@ -6,16 +6,20 @@ import (
 	"os"
 	"strings"
 	"tip-peg-parser-go/pkg"
+	"tip-peg-parser-go/pkg/tree"
 )
 
 func main() {
-	code := "x = 1;\n" +
-		"y = 2;\n" +
-		"z = x + y;\n" +
-		"output z;"
+	code := "x = 10;\n" +
+		"if (x > input)   { \n" +
+		"	output x;\n" +
+		"} else {\n" +
+		"	output 0;\n" +
+		"} \n"
 
 	rootStatement := pkg.Parse(strings.Split(code, "\n"))
-	fmt.Printf("%s", rootStatement)
+	builder := tree.ASTreeBuilder{Root: rootStatement}
+	fmt.Printf("%s", builder.Build())
 }
 
 func openFile(path string) (*os.File, error) {
